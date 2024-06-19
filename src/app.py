@@ -29,6 +29,9 @@ def load_model(model_filename):
     print("Modelo cargado")
     return model
 
+#Obtener modelo
+model = load_model("temporalidad_3")
+
 @app.route('/', methods=['GET'])
 def ping():
     return jsonify({"response": "hello world"})
@@ -58,6 +61,20 @@ def upload_media():
     if 'file' not in request.files:
         return jsonify({'error':'media not provided'}), 400
     file = request.files['file']
+
+    if file.filename == '':
+        return jsonify({'error': 'no file selected'}), 400
+
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+    return jsonify({'msg':'media uploaded successfully'}) 
+
+@app.route('/predict', methods=['POST'])
+def predict():
+    if 'image' not in request.files:
+        return jsonify({'error':'media not provided'}), 400
+    file = request.files['image']
 
     if file.filename == '':
         return jsonify({'error': 'no file selected'}), 400
