@@ -26,11 +26,18 @@ def load_model(model_filename):
     model_path = os.path.join(os.path.dirname(__file__), '..', 'models', f'{model_filename}.pkl')
     with open(model_path, 'rb') as f:
         model = pickle.load(f)
-    print("Modelo cargado")
+    print(f"Modelo {model_filename} cargado")
     return model
 
-#Obtener modelo
-model = load_model("temporalidad_3")
+#modelos
+model_filenames = [
+    'intensidad_1', 'intensidad_2', 'localizacion_1', 'localizacion_2',
+    'localizacion_3', 'localizacion_4', 'numeros',
+    'temporalidad_1', 'temporalidad_2', 'temporalidad_3', 'temporalidad_4'
+]
+
+#Cargar todos los modelos
+models = {name: load_model(name) for name in model_filenames}
 
 @app.route('/', methods=['GET'])
 def ping():
@@ -110,13 +117,17 @@ def predict():
 
                 # Make Detections
                 X = pd.DataFrame([row])
-                body_language_class = model.predict(X)[0]
-                body_language_prob = model.predict_proba(X)[0].tolist()
+                predictions = []
+                for name, model in models.items():
+                    body_language_class = model.predict(X)[0]
+                    body_language_prob = model.predict_proba(X)[0].tolist()
+                    predictions.append({
+                        'model': name,
+                        'body_language_class': body_language_class,
+                        'body_language_prob': body_language_prob
+                    })
 
-                return jsonify({
-                    'body_language_class': body_language_class,
-                    'body_language_prob': body_language_prob
-                })
+                return jsonify(predictions)
             except Exception as e:
                 return jsonify({'error': str(e)}), 500
 
