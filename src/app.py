@@ -3,15 +3,8 @@ from flask import Flask, jsonify, flash, request, redirect, url_for
 from werkzeug.utils import secure_filename
 from users import users
 
-UPLOAD_FOLDER = 'uploads/'
-ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
-
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-#crear carpeta
-if not os.path.exists(UPLOAD_FOLDER):
-    os.makedirs(UPLOAD_FOLDER)
 
 @app.route('/', methods=['GET'])
 def ping():
@@ -20,6 +13,23 @@ def ping():
 @app.route('/users')
 def userHandler():
     return jsonify({"users": users})
+
+@app.route('/users', methods=['POST'])
+def add_user():
+    return jsonify(request.get_json())
+
+@app.route('/users/<int:id>')
+def get_user_by_id(id):
+    return_value={}
+    print(type(id))
+    for user in users:
+        if user["id"] == id:
+            return_value={
+                'name': user["name"],
+                'lastname':user["lastname"]
+            }
+    return jsonify(return_value)
+
 
 
 
