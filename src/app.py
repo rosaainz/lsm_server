@@ -1,10 +1,17 @@
 import os
+import cv2
+import numpy as np
+import pandas as pd
+import pickle
+import mediapipe as mp
 from flask import Flask, jsonify, flash, request, redirect, url_for
 from werkzeug.utils import secure_filename
 from users import users
 
 UPLOAD_FOLDER = '/Users/rosasainz/Documents/uam/lsm_server/uploads'
 ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
+mp_drawing = mp.solutions.drawing_utils 
+mp_holistic = mp.solutions.holistic 
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -13,6 +20,14 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+#cargar el modelo
+def load_model(model_filename):
+    model_path = os.path.join(os.path.dirname(__file__), '..', 'models', f'{model_filename}.pkl')
+    with open(model_path, 'rb') as f:
+        model = pickle.load(f)
+    print("Modelo cargado")
+    return model
 
 @app.route('/', methods=['GET'])
 def ping():
