@@ -81,8 +81,47 @@ def predict():
 
     if file and allowed_file(file.filename):
         filename = secure_filename(file.filename)
-        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-    return jsonify({'msg':'media uploaded successfully'}) 
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(file_path)
+
+        # Leer la imagen
+        image = cv2.imread(file_path)
+
+        with mp_holistic.Holistic(min_detection_confidence=0.7, min_tracking_confidence=0.6) as holistic:
+            # Recolor Feed
+            image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+            image_rgb.flags.writeable = False
+
+            # Make Detections
+            results = holistic.process(image_rgb)
+
+            # Export coordinates
+            try:
+                # Extract Pose landmarks
+                pose = results.pose_landmarks.landmark
+                pose_row = list(np.array([[landmark.x, landmark.y, landmark.z, landmark.visibility] for landmark in pose]).flatten())
+
+                # Extract Face landmarks
+                face = results.face_landmarks.landmark
+                face_row = list(np.array([[landmark.x, landmark.y, landmark.z, landmark.visibility] for landmark in face]).flatten())
+
+                # Concatenate rows
+                row = pose_row + face_row
+
+                # Make Detections
+                X = pd.DataFrame([row])
+                body_language_class = model.predict(X)[0]
+                body_language_prob = model.predict_proba(X)[0].tolist()
+
+                return jsonify({
+                    'body_language_class': body_language_class,
+                    'body_language_prob': body_language_prob
+                })
+            except Exception as e:
+                return jsonify({'error': str(e)}), 500
+
+    return jsonify({'error': 'Invalid file format'}), 400
+
 
 if __name__ == '__main__':  
     app.run(host="0.0.0.0", port=4000, debug=True)
