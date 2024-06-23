@@ -134,5 +134,12 @@ def predict():
     return jsonify({'error': 'Invalid file format'}), 400
 
 
+@app.route('/', methods=['POST'])
+def receive_data():
+    data = request.get_json()
+    print(f"Received data: {data}")
+    return jsonify({"status": "success", "data_received": data})
+
+
 if __name__ == '__main__':  
     app.run(host="0.0.0.0", port=4000, debug=True)
