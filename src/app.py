@@ -6,7 +6,6 @@ import pickle
 import mediapipe as mp
 from flask import Flask, jsonify, flash, request, redirect, url_for
 from werkzeug.utils import secure_filename
-from users import users
 
 UPLOAD_FOLDER = '/Users/rosasainz/Documents/uam/lsm_server/uploads'
 ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
@@ -38,30 +37,6 @@ model_filenames = [
 
 #Cargar todos los modelos
 models = {name: load_model(name) for name in model_filenames}
-
-@app.route('/', methods=['GET'])
-def ping():
-    return jsonify({"response": "hello world"})
-
-@app.route('/users')
-def userHandler():
-    return jsonify({"users": users})
-
-@app.route('/users', methods=['POST'])
-def add_user():
-    return jsonify(request.get_json())
-
-@app.route('/users/<int:id>')
-def get_user_by_id(id):
-    return_value={}
-    print(type(id))
-    for user in users:
-        if user["id"] == id:
-            return_value={
-                'name': user["name"],
-                'lastname':user["lastname"]
-            }
-    return jsonify(return_value)
 
 @app.route('/upload', methods=['POST'])
 def upload_media():
