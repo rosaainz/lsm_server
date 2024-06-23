@@ -28,6 +28,21 @@ def load_model(model_filename):
     print(f"Modelo {model_filename} cargado")
     return model
 
+def max_prediction(predictions):
+    max_prob = -1.0
+    best_prediction = None
+
+    for prediction in predictions:
+        body_language_prob = prediction['body_language_prob']
+        prob = body_language_prob[0] if isinstance(body_language_prob, list) else body_language_prob
+
+        if prob > max_prob:
+            max_prob = prob
+            best_prediction = prediction
+    return best_prediction
+
+
+
 #modelos
 model_filenames = [
     'intensidad_1', 'intensidad_2', 'localizacion_1', 'localizacion_2',
@@ -50,10 +65,12 @@ def upload_media():
     if file and allowed_file(file.filename):
         filename = secure_filename(file.filename)
         file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        print("filename"+file.filename)
     return jsonify({'msg':'media uploaded successfully'}) 
 
 @app.route('/predict', methods=['POST'])
 def predict():
+    print(request.headers)
     if 'image' not in request.files:
         return jsonify({'error':'media not provided'}), 400
     file = request.files['image']
@@ -64,6 +81,7 @@ def predict():
     if file and allowed_file(file.filename):
         filename = secure_filename(file.filename)
         file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        print("filename: "+file.filename)
         file.save(file_path)
 
         # Leer la imagen
@@ -101,8 +119,11 @@ def predict():
                         'body_language_class': body_language_class,
                         'body_language_prob': body_language_prob
                     })
-
-                return jsonify(predictions)
+                #return jsonify(max_prediction(predictions))
+                response = max_prediction(predictions)
+                print(response)
+                return jsonify(response)
+        
             except Exception as e:
                 return jsonify({'error': str(e)}), 500
 
