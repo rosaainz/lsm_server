@@ -41,8 +41,6 @@ def max_prediction(predictions):
             best_prediction = prediction
     return best_prediction
 
-
-
 #modelos
 model_filenames = [
     'intensidad_1', 'intensidad_2', 'localizacion_1', 'localizacion_2',
@@ -52,6 +50,10 @@ model_filenames = [
 
 #Cargar todos los modelos
 models = {name: load_model(name) for name in model_filenames}
+
+@app.route('/', methods=['GET'])
+def mess():
+    return jsonify("Hola")
 
 @app.route('/upload', methods=['POST'])
 def upload_media():
@@ -121,6 +123,7 @@ def predict():
                     })
                 #return jsonify(max_prediction(predictions))
                 response = max_prediction(predictions)
+                print(predictions)
                 print(response)
                 return jsonify(response)
         
@@ -128,14 +131,6 @@ def predict():
                 return jsonify({'error': str(e)}), 500
 
     return jsonify({'error': 'Invalid file format'}), 400
-
-
-@app.route('/', methods=['POST'])
-def receive_data():
-    data = request.get_json()
-    print(f"Received data: {data}")
-    return jsonify({"status": "success", "data_received": data})
-
 
 if __name__ == '__main__':  
     app.run(host="0.0.0.0", port=4000, debug=True)
