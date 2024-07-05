@@ -1,17 +1,18 @@
 # LSM Server
 
-## Descripción
+
+## 📃 Descripción
 
 LSM Server es una aplicación diseñada para el procesamiento de imágenes enviadas desde una aplicación móvil. El objetivo principal es detectar y reconocer señas de la Lengua de Señas Mexicana (LSM) utilizando modelos de aprendizaje automático.
 
-## Funcionalidades
+## 📚 Características
 
 - Recepción de imágenes desde la aplicación móvil.
 - Procesamiento de imágenes para la detección de señas.
 - Uso de modelos de clasificación entrenados para interpretar las señas.
 - Respuesta con los resultados de la detección a la aplicación móvil.
 
-## Tecnologías Utilizadas
+## 🖥️ Tecnologías Utilizadas
 
 - **Python**: Lenguaje principal para la lógica del servidor.
 - **Flask**: Framework web ligero para manejar solicitudes HTTP.
@@ -19,7 +20,7 @@ LSM Server es una aplicación diseñada para el procesamiento de imágenes envia
 - **scikit-learn**: Utilizado para cargar y aplicar los modelos de clasificación.
 - **Mediapipe**: Utilizado para el preprocesamiento de imágenes y detección de características.
 
-## Estructura del Proyecto
+## 🧬 Estructura del Proyecto
 
 ```plaintext
 .
@@ -29,7 +30,7 @@ LSM Server es una aplicación diseñada para el procesamiento de imágenes envia
 ├── uploads                # Carpeta para almacenar imágenes recibidas
 └── README.md              # Documentación del proyecto
 ```
-## Instalación
+## ⚙️ Instalación
 Para instalar y configurar el servidor, sigue estos pasos:
 1. Clona este repositorio:
     ```sh
@@ -40,14 +41,14 @@ Para instalar y configurar el servidor, sigue estos pasos:
       cd lsm_server
     ```
 
-## Uso
+## 🤳 Uso
 Para ejecutar el servidor, utiliza el siguiente comando:
     ```sh
         python src/app.py
     ```
 El servidor estará disponible en http://localhost:4000.
 
-## Contribuir
+##  🙌  Contribuir
 
 ¡Las contribuciones son bienvenidas! Para contribuir, sigue estos pasos:
 
@@ -57,11 +58,11 @@ El servidor estará disponible en http://localhost:4000.
 4. Haz push a la rama (`git push origin feature/nueva-funcionalidad`).
 5. Abre un Pull Request.
 
-## Licencia
+## ⚖️ Licencia
 
 Este proyecto está licenciado bajo la Licencia MIT. Consulta el archivo [LICENSE](LICENSE) para más detalles.
 
-## Contacto
+## 🐚 Contacto
 
 Si tienes alguna pregunta o sugerencia, por favor escribeme a través de www.linkedin.com/in/rosa-sainz-0b0b19212.
 
