@@ -12,8 +12,33 @@ ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
 mp_drawing = mp.solutions.drawing_utils 
 mp_holistic = mp.solutions.holistic 
 
+
+#modelos
+model_filenames = [
+    'intensidad_1', 'intensidad_2', 'localizacion_1', 'localizacion_2',
+    'localizacion_3', 'localizacion_4', 'numeros',
+    'temporalidad_1', 'temporalidad_2', 'temporalidad_3', 'temporalidad_4'
+]
+
+model_temporalidad = [
+    'temporalidad_1', 'temporalidad_2', 'temporalidad_3', 'temporalidad_4'
+]
+
+model_localizacion = [
+    'localizacion_1', 'localizacion_2',
+    'localizacion_3', 'localizacion_4'
+]
+
+model_intensidad = [
+    'intensidad_1', 'intensidad_2'
+]
+
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+#crear carpeta
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
 
 #verificar la extension del archivo
 def allowed_file(filename):
@@ -41,25 +66,45 @@ def max_prediction(predictions):
             best_prediction = prediction
     return best_prediction
 
-#modelos
-model_filenames = [
-    'intensidad_1', 'intensidad_2', 'localizacion_1', 'localizacion_2',
-    'localizacion_3', 'localizacion_4', 'numeros',
-    'temporalidad_1', 'temporalidad_2', 'temporalidad_3', 'temporalidad_4'
-]
+def processImagesModels(file_path, models):
+    predictions = []
 
-model_temporalidad = [
-    'temporalidad_1', 'temporalidad_2', 'temporalidad_3', 'temporalidad_4'
-]
+    # Leer la imagen
+    image = cv2.imread(file_path)
+    with mp_holistic.Holistic(min_detection_confidence=0.7, min_tracking_confidence=0.6) as holistic:
+        # Recolor Feed
+        image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        image_rgb.flags.writeable = False
 
-model_localizacion = [
-    'localizacion_1', 'localizacion_2',
-    'localizacion_3', 'localizacion_4'
-]
+        # Make Detections
+        results = holistic.process(image_rgb)
 
-model_intensidad = [
-    'intensidad_1', 'intensidad_2'
-]
+        # Export coordinates
+        try:
+            # Extract Pose landmarks
+            pose = results.pose_landmarks.landmark
+            pose_row = list(np.array([[landmark.x, landmark.y, landmark.z, landmark.visibility] for landmark in pose]).flatten())
+
+            # Extract Face landmarks
+            face = results.face_landmarks.landmark
+            face_row = list(np.array([[landmark.x, landmark.y, landmark.z, landmark.visibility] for landmark in face]).flatten())
+
+            # Concatenate rows
+            row = pose_row + face_row
+
+            # Make Detections
+            X = pd.DataFrame([row])
+            for name, model in models.items():
+                body_language_class = model.predict(X)[0]
+                body_language_prob = model.predict_proba(X)[0].tolist()
+                predictions.append({
+                    'model': name,
+                    'body_language_class': body_language_class,
+                    'body_language_prob': body_language_prob
+                })
+        except:
+            pass
+    return predictions
 
 #Cargar todos los modelos
 models = {name: load_model(name) for name in model_filenames}
@@ -87,9 +132,56 @@ def upload_media():
         file.save(file_path)
     return jsonify({'msg':file.filename}) 
 
+@app.route('/processTemporalidad', methods=['POST'])
+def processTemporalidad():
+    if 'image' not in request.files:
+        return jsonify({'error':'media not provided'}), 400
+    file = request.files['image']
+
+    if file.filename == '':
+        return jsonify({'error': 'no file selected'}), 400
+
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        print("filename: "+file.filename)
+        file.save(file_path)
+    return jsonify({'msg':file.filename+"_temporalidad"}) 
+
+@app.route('/processLocalizacion', methods=['POST'])
+def processLocalizacion():
+    if 'image' not in request.files:
+        return jsonify({'error':'media not provided'}), 400
+    file = request.files['image']
+
+    if file.filename == '':
+        return jsonify({'error': 'no file selected'}), 400
+
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        print("filename: "+file.filename)
+        file.save(file_path)
+    return jsonify({'msg':file.filename+"_localizacion"}) 
+
+@app.route('/processIntensidad', methods=['POST'])
+def processIntensidad():
+    if 'image' not in request.files:
+        return jsonify({'error':'media not provided'}), 400
+    file = request.files['image']
+
+    if file.filename == '':
+        return jsonify({'error': 'no file selected'}), 400
+
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        print("filename: "+file.filename)
+        file.save(file_path)
+    return jsonify({'msg':file.filename+"_intensidad"}) 
+
 @app.route('/processImages', methods=['POST'])
 def processImages():
-    imageCount = None
     print(request.headers)
     if 'image' not in request.files:
         return jsonify({'error':'media not provided'}), 400
@@ -140,12 +232,6 @@ def processImages():
                         'body_language_class': body_language_class,
                         'body_language_prob': body_language_prob
                     })
-                # Asignar el nombre de archivo de la última predicción
-                filename = predictions[-1]['image'] if predictions else None
-                response = {
-                    "status": "OK",
-                     "imageCount": filename
-                }
                 return jsonify(predictions)
         
             except Exception as e:
