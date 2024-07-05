@@ -48,8 +48,24 @@ model_filenames = [
     'temporalidad_1', 'temporalidad_2', 'temporalidad_3', 'temporalidad_4'
 ]
 
+model_temporalidad = [
+    'temporalidad_1', 'temporalidad_2', 'temporalidad_3', 'temporalidad_4'
+]
+
+model_localizacion = [
+    'localizacion_1', 'localizacion_2',
+    'localizacion_3', 'localizacion_4'
+]
+
+model_intensidad = [
+    'intensidad_1', 'intensidad_2'
+]
+
 #Cargar todos los modelos
 models = {name: load_model(name) for name in model_filenames}
+models_temporalidad = {name: load_model(name) for name in model_temporalidad}
+models_localizacion = {name: load_model(name) for name in model_localizacion}
+model_intensidad = {name: load_model(name) for name in model_intensidad}
 
 @app.route('/', methods=['GET'])
 def mess():
@@ -57,21 +73,23 @@ def mess():
 
 @app.route('/upload', methods=['POST'])
 def upload_media():
-    if 'file' not in request.files:
+    if 'image' not in request.files:
         return jsonify({'error':'media not provided'}), 400
-    file = request.files['file']
+    file = request.files['image']
 
     if file.filename == '':
         return jsonify({'error': 'no file selected'}), 400
 
     if file and allowed_file(file.filename):
         filename = secure_filename(file.filename)
-        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-        print("filename"+file.filename)
-    return jsonify({'msg':'media uploaded successfully'}) 
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        print("filename: "+file.filename)
+        file.save(file_path)
+    return jsonify({'msg':file.filename}) 
 
-@app.route('/predict', methods=['POST'])
-def predict():
+@app.route('/processImages', methods=['POST'])
+def processImages():
+    imageCount = None
     print(request.headers)
     if 'image' not in request.files:
         return jsonify({'error':'media not provided'}), 400
@@ -118,19 +136,22 @@ def predict():
                     body_language_prob = model.predict_proba(X)[0].tolist()
                     predictions.append({
                         'model': name,
+                        'image': file.filename,
                         'body_language_class': body_language_class,
                         'body_language_prob': body_language_prob
                     })
-                #return jsonify(max_prediction(predictions))
-                response = max_prediction(predictions)
-                print(predictions)
-                print(response)
-                return jsonify(response)
+                # Asignar el nombre de archivo de la última predicción
+                filename = predictions[-1]['image'] if predictions else None
+                response = {
+                    "status": "OK",
+                     "imageCount": filename
+                }
+                return jsonify(predictions)
         
             except Exception as e:
                 return jsonify({'error': str(e)}), 500
 
     return jsonify({'error': 'Invalid file format'}), 400
-
+    
 if __name__ == '__main__':  
     app.run(host="0.0.0.0", port=4000, debug=True)
