@@ -40,6 +40,10 @@ Para instalar y configurar el servidor, sigue estos pasos:
     ```sh
       cd lsm_server
     ```
+3. Ejecuta la aplicación:
+    ```sh
+      python3 src/app.py
+    ```
 
 ## 🤳 Uso
 Para ejecutar el servidor, utiliza el siguiente comando:
