@@ -14,11 +14,11 @@ LSM Server es una aplicación diseñada para el procesamiento de imágenes envia
 
 ## 🖥️ Tecnologías Utilizadas
 
-- **Python**: Lenguaje principal para la lógica del servidor.
-- **Flask**: Framework web ligero para manejar solicitudes HTTP.
-- **OpenCV**: Librería para el procesamiento de imágenes.
-- **scikit-learn**: Utilizado para cargar y aplicar los modelos de clasificación.
-- **Mediapipe**: Utilizado para el preprocesamiento de imágenes y detección de características.
+- **Python 3.10.4**: Lenguaje principal para la lógica del servidor.
+- **Flask 3.0.3**: Framework web ligero para manejar solicitudes HTTP.
+- **OpenCV 4.8.1.78**: Librería para el procesamiento de imágenes.
+- **scikit-learn 1.5.1**: Utilizado para cargar y aplicar los modelos de clasificación.
+- **Mediapipe 0.9.1.0**: Utilizado para el preprocesamiento de imágenes y detección de características.
 
 ## 🧬 Estructura del Proyecto
 
