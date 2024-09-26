@@ -22,6 +22,5 @@ COPY src/ /app/src/
 
 # Expone el puerto que usará la aplicación (Railway usa el puerto 8080)
 EXPOSE 8080
-
 # Comando para ejecutar la aplicación usando gunicorn
 CMD ["gunicorn", "-b", "0.0.0.0:8080", "src.app:app"]
