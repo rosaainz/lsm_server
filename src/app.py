@@ -265,10 +265,10 @@ def processIntensidad():
     return jsonify({'error': 'Invalid file format'}), 400
     
 # Verifica si el archivo se está ejecutando directamente
-if __name__ == '__main__':  
+#if __name__ == '__main__':  
     # Inicia el servidor Flask
     # - host="0.0.0.0": permite que el servidor sea accesible desde cualquier dirección IP en la red
     # - port=4000: especifica el puerto en el que el servidor escuchará las solicitudes
     # - debug=True: activa el modo de depuración, lo que permite ver errores en el navegador
     #   y recarga automática del servidor al realizar cambios en el código
-    app.run(host="0.0.0.0", port=4000, debug=True)
+    #app.run(host="0.0.0.0", port=8080, debug=True)
