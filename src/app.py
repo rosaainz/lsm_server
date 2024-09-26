@@ -15,6 +15,11 @@ import mediapipe as mp
 from flask import Flask, jsonify, flash, request, redirect, url_for
 # Esta librería se utiliza para asegurar que los nombres de archivos sean seguros y apropiados para su uso en el sistema de archivos.
 from werkzeug.utils import secure_filename
+import logging
+
+# Configurar logging
+logging.basicConfig(level=logging.DEBUG)
+logging.warning("Application started and running on port")
 
 # Definir extensiones de archivo permitidas
 ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
@@ -38,6 +43,9 @@ model_intensidad = ['intensidad_1', 'intensidad_2']
 
 # Crear la aplicación Flask
 app = Flask(__name__)
+
+# Definir el puerto
+port = int(os.environ.get('PORT', 8080))
 
 # La función allowed_fi se utiliza para verificar si el archivo tiene una extensión permitida
 def allowed_file(filename):
@@ -71,7 +79,7 @@ def max_prediction(predictions):
 models = {name: load_model(name) for name in model_filenames}
 models_temporalidad = {name: load_model(name) for name in model_temporalidad}
 models_localizacion = {name: load_model(name) for name in model_localizacion}
-model_intensidad = {name: load_model(name) for name in model_intensidad}
+models_intensidad = {name: load_model(name) for name in model_intensidad}
 
 # Ruta principal que devuelve un saludo, esto para probar una correcta conexion con la API
 @app.route('/', methods=['GET'])
@@ -246,7 +254,7 @@ def processIntensidad():
                 predictions = []
 
                 # Hacer predicciones usando los modelos de temporalidad
-                for name, model in model_intensidad.items():
+                for name, model in models_intensidad.items():
                     body_language_class = model.predict(X)[0]
                     body_language_prob = model.predict_proba(X)[0].tolist()
                     predictions.append({
@@ -265,12 +273,6 @@ def processIntensidad():
     return jsonify({'error': 'Invalid file format'}), 400
     
 # Verifica si el archivo se está ejecutando directamente
-if __name__ == '__main__':  
-    # Inicia el servidor Flask
-    # - host="0.0.0.0": permite que el servidor sea accesible desde cualquier dirección IP en la red
-    # - port=4000: especifica el puerto en el que el servidor escuchará las solicitudes
-    # - debug=True: activa el modo de depuración, lo que permite ver errores en el navegador
-    #   y recarga automática del servidor al realizar cambios en el código
-    #app.run(host="0.0.0.0", port=8080, debug=True)
-    port = int(os.environ.get("PORT", 8080))
-    app.run(host="0.0.0.0", port=port)
+# Iniciar la aplicación Flask
+#if __name__ == '__main__':
+#    app.run(host="0.0.0.0", port=port, debug=True)
